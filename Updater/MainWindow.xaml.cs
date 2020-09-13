@@ -23,7 +23,6 @@ namespace Updater
     public partial class MainWindow : Window
     {
         static Downloader DownLoader;
-        static readonly INIManager UpdaterINI = new INIManager("Updater.ini");
         public MainWindow()
         {
             DownLoader = new Downloader();
@@ -36,6 +35,7 @@ namespace Updater
         {
             if (File.Exists("Updater.ini"))
             {
+                INIManager UpdaterINI = new INIManager("Updater.ini");
                 DownLoader.Title = Title = UpdaterINI.GetPrivateString("UI", "Title", Title);
                 WN.Content = UpdaterINI.GetPrivateString("UI", "WhatNew", WN.Content.ToString());
                 RemindMeLater.Content = UpdaterINI.GetPrivateString("UI", "RemindLater", RemindMeLater.Content.ToString());
@@ -73,38 +73,42 @@ namespace Updater
                 }
             }
         }
-        private void WriteINIFile()
+        private void WriteINIFile() //Bad
         {
-            UpdaterINI.WritePrivateString("UI", "Title", Title);
-            UpdaterINI.WritePrivateString("UI", "WhatNew", WN.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "RemindLater", RemindMeLater.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "UpdateNow", UpdateNow.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "Available", AvailableVer.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "Current", CurrentVer.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "PleaseWait", DownLoader.PleaseWait.Content.ToString());
-            UpdaterINI.WritePrivateString("UI", "DownloadingFile", Downloader.DownloadingUpdate);
-            UpdaterINI.WritePrivateString("UI", "ExtractingUpdate", Downloader.ExtractUpdate);
-            UpdaterINI.WritePrivateString("UI", "DarkTheme", Application.Current.Resources.MergedDictionaries.Count.ToString());
-            UpdaterINI.WritePrivateString("UI", "LogLang", MyStatic.LogLanguage);
-            UpdaterINI.WritePrivateString("Updates", "LinkORToken", MyStatic.LinkOrToken);
-            UpdaterINI.WritePrivateString("Updates", "Run", MyStatic.RunAfterUpdate);
-            UpdaterINI.WritePrivateString("Updates", "RunParams", MyStatic.RunAfterUpdateParams);
-            switch (MyStatic.Type)
+            if (File.Exists("Updater.ini"))
             {
-                case UpdateType.GitHubReleases:
-                    UpdaterINI.WritePrivateString("Updates", "Type", "GitHub");
-                    break;
-                case UpdateType.XMLServer:
-                    UpdaterINI.WritePrivateString("Updates", "Type", "XMLS");
-                    break;
-                case UpdateType.WSXZApi:
-                    UpdaterINI.WritePrivateString("Updates", "Type", "API");
-                    break;
-                case UpdateType.None:
-                    UpdaterINI.WritePrivateString("Updates", "Type", "None");
-                    UpdaterINI.WritePrivateString("Updates", "LinkORToken", "Undefined");
-                    UpdaterINI.WritePrivateString("Updates", "Run", "Undefined");
-                    break;
+                INIManager UpdaterINI = new INIManager("Updater.ini");
+                UpdaterINI.WritePrivateString("UI", "Title", Title);
+                UpdaterINI.WritePrivateString("UI", "WhatNew", WN.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "RemindLater", RemindMeLater.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "UpdateNow", UpdateNow.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "Available", AvailableVer.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "Current", CurrentVer.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "PleaseWait", DownLoader.PleaseWait.Content.ToString());
+                UpdaterINI.WritePrivateString("UI", "DownloadingFile", Downloader.DownloadingUpdate);
+                UpdaterINI.WritePrivateString("UI", "ExtractingUpdate", Downloader.ExtractUpdate);
+                UpdaterINI.WritePrivateString("UI", "DarkTheme", Application.Current.Resources.MergedDictionaries.Count.ToString());
+                UpdaterINI.WritePrivateString("UI", "LogLang", MyStatic.LogLanguage);
+                UpdaterINI.WritePrivateString("Updates", "LinkORToken", MyStatic.LinkOrToken);
+                UpdaterINI.WritePrivateString("Updates", "Run", MyStatic.RunAfterUpdate);
+                UpdaterINI.WritePrivateString("Updates", "RunParams", MyStatic.RunAfterUpdateParams);
+                switch (MyStatic.Type)
+                {
+                    case UpdateType.GitHubReleases:
+                        UpdaterINI.WritePrivateString("Updates", "Type", "GitHub");
+                        break;
+                    case UpdateType.XMLServer:
+                        UpdaterINI.WritePrivateString("Updates", "Type", "XMLS");
+                        break;
+                    case UpdateType.WSXZApi:
+                        UpdaterINI.WritePrivateString("Updates", "Type", "API");
+                        break;
+                    case UpdateType.None:
+                        UpdaterINI.WritePrivateString("Updates", "Type", "None");
+                        UpdaterINI.WritePrivateString("Updates", "LinkORToken", "Undefined");
+                        UpdaterINI.WritePrivateString("Updates", "Run", "Undefined");
+                        break;
+                }
             }
         }
         private void ParseComandline()
@@ -215,7 +219,7 @@ namespace Updater
             }
             if (MyStatic.Type == UpdateType.None)
                 MyStatic.RunApp();
-            WriteINIFile();
+
             //Если версия не указана берем ее сами
             if (string.IsNullOrEmpty(version))
             {
@@ -242,6 +246,8 @@ namespace Updater
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (MyStatic.Type == UpdateType.None)
+                MyStatic.RunApp();
             Hide();
             DownLoader.Show();
             DownLoader.StartDownload();
