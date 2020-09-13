@@ -11,7 +11,7 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <Label Content="Available new version" x:Name="AvailableVer" Margin="10,10,10,0" VerticalAlignment="Top"/>
+        <Label Content="Available version" x:Name="AvailableVer" Margin="10,10,10,0" VerticalAlignment="Top"/>
         <Label x:Name="CurrentVer" Content="Current Version" Margin="0,10,10,0" VerticalAlignment="Top" Grid.Column="1" HorizontalContentAlignment="Center"/>
         <TextBox x:Name="UpdLog" Margin="10,62,10,41" IsReadOnly="True" TextWrapping="Wrap" IsReadOnlyCaretVisible="True" Grid.ColumnSpan="2"/>
         <Label x:Name="WN" Content="What new" Margin="10,46,0,0" VerticalAlignment="Top" Padding="5,0,0,0"/>

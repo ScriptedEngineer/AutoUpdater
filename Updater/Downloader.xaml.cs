@@ -90,7 +90,7 @@ namespace Updater
                 MyExtentions.AsyncWorker(() =>
                 {
                     Status.Content = "Updated";
-                    MyStatic.RunApp();
+                    MyStatic.RunApp(true);
                 });
             }).Start();
         }

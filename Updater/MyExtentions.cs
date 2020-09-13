@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -25,6 +27,7 @@ namespace Updater
         public static UpdateType Type = UpdateType.None;
         public static string LinkOrToken = "";//ScriptedEngineer/SE-BlueprintEditor
         public static string RunAfterUpdate = "";
+        public static string RunAfterUpdateParams = "";
         static bool? AppRunned = null;
         public static string DownloadURL = null;
         static string SomeData = "";
@@ -111,10 +114,16 @@ namespace Updater
                 case UpdateType.GitHubReleases:
                     using (var client = new System.Net.WebClient())
                     {
-                        client.Headers.Add("User-Agent", "ScriptedUpdater");
+                        client.Headers.Add("User-Agent", "https://github.com/ScriptedEngineer/AutoUpdater");
                         client.Encoding = Encoding.UTF8;
-                        SomeData = client.DownloadString($"https://api.github.com/repos/{LinkOrToken}/releases");
-                        DownloadURL = MyExtentions.RegexMatch(SomeData, @"""browser_download_url"":""([^""]*)""");
+                        try {
+                            SomeData = client.DownloadString($"https://api.github.com/repos/{LinkOrToken}/releases");
+                            DownloadURL = MyExtentions.RegexMatch(SomeData, @"""browser_download_url"":""([^""]*)""");
+                        }
+                        catch
+                        {
+                            RunApp();
+                        }
                     }
                     break;
                 case UpdateType.XMLServer:
@@ -129,7 +138,7 @@ namespace Updater
             {
                 try
                 {
-                    Process.Start(RunAfterUpdate, updated?"Updated":"RemindLater");
+                    Process.Start(RunAfterUpdate, (updated?"/Updated ":"/RemindLater ")+RunAfterUpdateParams);
                     AppRunned = true;
                 }
                 catch
@@ -155,5 +164,35 @@ namespace Updater
         GitHubReleases,
         XMLServer,
         WSXZApi
+    }
+
+    
+    public class INIManager
+    {
+        public INIManager(string aPath)
+        {
+            path = Path.Combine(Directory.GetCurrentDirectory(),aPath);
+        }
+        public INIManager() : this("") { }
+        public string GetPrivateString(string aSection, string aKey, string dEfault = null)
+        {
+            StringBuilder buffer = new StringBuilder(SIZE);
+            GetPrivateString(aSection, aKey, null, buffer, SIZE, path);
+            string oust = buffer.ToString();
+            return string.IsNullOrEmpty(oust) ? dEfault : oust;
+        }
+        public void WritePrivateString(string aSection, string aKey, string aValue)
+        {
+            if(!string.IsNullOrEmpty(aValue))
+                WritePrivateString(aSection, aKey, aValue, path);
+        }
+        public string FilePath { get { return path; } set { path = value; } }
+        private const int SIZE = 1024;
+        private string path = null;
+        
+        [DllImport("kernel32.dll", EntryPoint = "GetPrivateProfileString")]
+        private static extern int GetPrivateString(string section, string key, string def, StringBuilder buffer, int size, string path);
+        [DllImport("kernel32.dll", EntryPoint = "WritePrivateProfileString")]
+        private static extern int WritePrivateString(string section, string key, string str, string path);
     }
 }
